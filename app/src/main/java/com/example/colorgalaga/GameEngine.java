@@ -101,7 +101,7 @@ public class GameEngine extends SurfaceView implements Runnable {
         // @TODO: Add your sprites
 
         // initalize sprites
-        this.bg = new Sprite(this.getContext(), 0, 0, R.drawable.background3);
+        this.bg = new Sprite(this.getContext(), 0 , -4000, R.drawable.background3);
         this.player = new Sprite(this.getContext(), 400, 1450, R.drawable.player_ship);
         this.enemy1 = new Sprite(this.getContext(), 100, 200, R.drawable.alien_ship1);
         this.bullet = new Square(context, 100, 700, SQUARE_WIDTH);
@@ -164,11 +164,11 @@ public class GameEngine extends SurfaceView implements Runnable {
     public void updatePositions() {
         // @TODO: Update position of player
 
-        this.bg.setyPosition(this.bg.getyPosition() - 15);
+        this.bg.setyPosition(this.bg.getyPosition() + 25);
 
-        if(this.bg.getyPosition() + this.bg.image.getHeight() + 750 < this.VISIBLE_BOTTOM + 3500){
+        if(this.bg.getyPosition() > this.VISIBLE_BOTTOM - 2500 ){
             this.bg.setxPosition(0);
-            this.bg.setyPosition(0);
+            this.bg.setyPosition(-4200);
 
 
         }
@@ -200,8 +200,16 @@ public class GameEngine extends SurfaceView implements Runnable {
         // 3. calculate new (x,y) coordinates
         int newX = this.bullet.getxPosition() + (int) (xn * 15);
         int newY = this.bullet.getyPosition() + (int) (yn * 15);
-        this.bullet.setxPosition(newX);
-        this.bullet.setyPosition(newY);
+
+        this.bullet.setxPosition(newX );
+        this.bullet.setyPosition(newY );
+
+        if (this.bullet.getyPosition() == newY && this.bullet.getxPosition() == newX ){
+
+            this.bullet.setyPosition(this.bullet.getyPosition());
+            this.bullet.setyPosition(this.bullet.getyPosition() - 120);
+
+        }
 
         //Upate hitbox
         this.bullet.updateHitbox();
