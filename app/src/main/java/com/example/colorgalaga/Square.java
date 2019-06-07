@@ -12,6 +12,10 @@ public class Square {
     // make the hitbox
     Rect hitbox;
 
+    // vector variables
+    double xn = 0;
+    double yn = 0;
+
     public Square(Context context, int x, int y, int width) {
         this.xPosition = x;
         this.yPosition = y;
@@ -30,17 +34,32 @@ public class Square {
         return hitbox;
     }
 
-//    public void setHitbox(Rect hitbox) {
-//        this.hitbox = hitbox;
-//    }
+    public void updateHitbox() {
+        this.hitbox.left = this.xPosition;
+        this.hitbox.top = this.yPosition;
+        this.hitbox.right = this.xPosition + this.width;
+        this.hitbox.bottom = this.yPosition + this.width;
+    }
 
-//    public void updateHitbox() {
-//        this.hitbox.left = this.xPosition;
-//        this.hitbox.top = this.yPosition;
-//        this.hitbox.right = this.xPosition + this.width;
-//        this.hitbox.bottom = this.yPosition + this.width;
-//    }
 
+    // ---------------------------------
+    // sets or gets the xd variable for this sprite
+    // ---------------------------------
+    public double getXn() {
+        return xn;
+    }
+
+    public void setXn(double xn) {
+        this.xn = xn;
+    }
+
+    public double getYn() {
+        return yn;
+    }
+
+    public void setYn(double yn) {
+        this.yn = yn;
+    }
 
     public int getxPosition() {
         return xPosition;
@@ -65,5 +84,8 @@ public class Square {
     public void setWidth(int width) {
         this.width = width;
     }
-}
 
+    public void setHitbox(Rect hitbox) {
+        this.hitbox = hitbox;
+    }
+}

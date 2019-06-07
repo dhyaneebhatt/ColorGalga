@@ -15,34 +15,45 @@ import java.util.Random;
 public class GameEngine extends SurfaceView implements Runnable {
 
     // Android debug variables
-    final static String TAG="TAPPY-SPACESHIP";
+    final static String TAG="ColorGala";
 
     // -----------------------------------
     // GAME SPECIFIC VARIABLES
     // -----------------------------------
 
-    // screen size
+    // screen resolution variables
     int screenHeight;
     int screenWidth;
 
-    // game state
-    boolean gameIsRunning;
+    // game thread variables
+    private Thread gameThread = null;
+    private volatile boolean gameIsRunning;
 
-    // threading
-    Thread gameThread;
 
     // drawing variables
-    SurfaceHolder holder;
-    Canvas canvas;
-    Paint paintbrush;
+    private Canvas canvas;
+    private Paint paintbrush;
+    private SurfaceHolder holder;
 
     //bullet width
-    int SQUARE_WIDTH = 100;
+    int SQUARE_WIDTH = 50;
     boolean enemyIsMovingDown = true;
 
     int initialPlayerY;
     int initialPlayerX;
 
+    int updatedY;
+    int updatedX;
+
+    // VISIBLE GAME PLAY AREA
+    // These variables are set in the constructor
+    int VISIBLE_LEFT;
+    int VISIBLE_TOP;
+    int VISIBLE_RIGHT;
+    int VISIBLE_BOTTOM;
+
+
+    // Multiple bullets
     ArrayList<Square> bullets = new ArrayList<Square>();
 
 
@@ -50,75 +61,49 @@ public class GameEngine extends SurfaceView implements Runnable {
     // ## SPRITES
     // ----------------------------
 
-
-    //Bullets
+    // Characters
+    Sprite player;
+    Sprite enemy1;
     Square bullet;
 
-    //Playeers
-    Player player;
 
-    // Enemy variables
-    Enemy enemy1;
-    Enemy enemy2;
-
-
-    // ----------------------------
-    // ## GAME STATS
-    // ----------------------------
+    // GAME STATS
     int score = 0;
     int lives = 3;
+
+
+
+    // ------------------------------
+    // Gane Engine Constructor
+    //-------------------------------
 
     public GameEngine(Context context, int w, int h) {
         super(context);
 
 
+        // intialize the drawing variables
         this.holder = this.getHolder();
         this.paintbrush = new Paint();
 
+
+        // set screen height and width
         this.screenWidth = w;
         this.screenHeight = h;
 
+        // setup visible game play area variables
+        this.VISIBLE_LEFT = 20;
+        this.VISIBLE_TOP = 10;
+        this.VISIBLE_RIGHT = this.screenWidth - 20;
+        this.VISIBLE_BOTTOM = (int) (this.screenHeight * 0.8);
 
-
-        this.printScreenInfo();
 
         // @TODO: Add your sprites
-        // @TODO: Any other game setup
 
-        // ----------------
-        // PLAYER SETUP
-        // ----------------
-        this.initialPlayerY = this.screenHeight - 400;
-        this.initialPlayerX = this.screenWidth / 2 - 100;
-        this.player = new Player(context,this.initialPlayerX, this.initialPlayerY);
+        // initalize sprites
+        this.player = new Sprite(this.getContext(), 400, 1450, R.drawable.player_ship);
+        this.enemy1 = new Sprite(this.getContext(), 100, 200, R.drawable.alien_ship1);
+        this.bullet = new Square(context, 100, 700, SQUARE_WIDTH);
 
-
-        // ----------------
-        // ENEMY SETUP
-        // ----------------
-        this.enemy1 = new Enemy(context, this.screenWidth - 500, 120);
-        this.enemy2 = new Enemy(context, this.screenWidth - 500, this.screenHeight - 400);
-
-        // --------------
-        //Bullet setup
-        //---------------
-        this.bullet = new Square(context, initialPlayerX,initialPlayerY , SQUARE_WIDTH);
-
-    }
-
-
-    private void printScreenInfo() {
-
-        Log.d(TAG, "Screen (w, h) = " + this.screenHeight + "," + this.screenWidth);
-    }
-
-    private void spawnPlayer() {
-        //@TODO: Start the player at the left side of screen
-    }
-    private void spawnEnemyShips() {
-        Random random = new Random();
-
-        //@TODO: Place the enemies in a random location
 
     }
 
@@ -180,8 +165,8 @@ public class GameEngine extends SurfaceView implements Runnable {
         // @TODO: Chasing code form bullet to enemy
 
         // 1. calculate distance between bullet and enemy
-        double a = this.enemy1.getxPosition() - this.bullet.getxPosition();
-        double b = this.enemy1.getyPosition() - this.bullet.getyPosition();
+        double a = updatedX - this.bullet.getxPosition();
+        double b = updatedY - this.bullet.getyPosition();
 
         // d = sqrt(a^2 + b^2)
 
@@ -200,7 +185,22 @@ public class GameEngine extends SurfaceView implements Runnable {
         this.bullet.setxPosition(newX);
         this.bullet.setyPosition(newY);
 
-    }
+        //Upate hitbox
+        this.bullet.updateHitbox();
+
+        // Colision of bullet and enemy
+        if (bullet.getHitbox().intersect(enemy1.getHitbox())) {
+
+            // UPDATE THE cage movement
+            this.enemy1.setxPosition(400);
+            this.enemy1.updateHitbox();
+
+        }
+
+}
+
+
+
 
     public void redrawSprites() {
         if (this.holder.getSurface().isValid()) {
@@ -208,24 +208,25 @@ public class GameEngine extends SurfaceView implements Runnable {
 
             //----------------
 
-            // configure the drawing tools
-            this.canvas.drawColor(Color.argb(255,255,255,255));
-            paintbrush.setColor(Color.WHITE);
+            // set the game's background color
+            canvas.drawColor(Color.argb(255,255,255,255));
+
+            // setup stroke style and width
+            paintbrush.setStyle(Paint.Style.FILL);
+            paintbrush.setStrokeWidth(8);
 
 
-            //@TODO: Draw the player
+            // --------------------------------------------------------
+            // draw player, enemy and bullet
+            // --------------------------------------------------------
+
+            // 1. player
             canvas.drawBitmap(this.player.getImage(), this.player.getxPosition(), this.player.getyPosition(), paintbrush);
 
-
-            //@TODO: Draw the enemy
-
-            // refactored to use Enemy object
+            // 2. sparrow
             canvas.drawBitmap(this.enemy1.getImage(), this.enemy1.getxPosition(), this.enemy1.getyPosition(), paintbrush);
 
-            canvas.drawBitmap(this.enemy2.getImage(), this.enemy2.getxPosition(), this.enemy2.getyPosition(), paintbrush);
-
-            //@TODO: Draw the bullet
-            // draw bullet
+            //3.Bullet
             paintbrush.setColor(Color.BLACK);
             canvas.drawRect(
                     this.bullet.getxPosition(),
@@ -238,45 +239,24 @@ public class GameEngine extends SurfaceView implements Runnable {
 
 
 
-            // DRAW THE PLAYER HITBOX
-            // ------------------------
-            // 1. change the paintbrush settings so we can see the hitbox
-            paintbrush.setColor(Color.BLUE);
+            // --------------------------------------------------------
+            // draw hitbox on player
+            // --------------------------------------------------------
+            Rect r = player.getHitbox();
             paintbrush.setStyle(Paint.Style.STROKE);
-            paintbrush.setStrokeWidth(5);
+            canvas.drawRect(r, paintbrush);
 
-            // 2. draw the hitbox
-            canvas.drawRect(this.player.getHitbox().left,
-                    this.player.getHitbox().top,
-                    this.player.getHitbox().right,
-                    this.player.getHitbox().bottom,
-                    paintbrush
-            );
-
-
-            // Draw enemy hitbox - refactored to use Enemy object
-            paintbrush.setColor(Color.RED);
-            canvas.drawRect(this.enemy1.getHitbox().left,
-                    this.enemy1.getHitbox().top,
-                    this.enemy1.getHitbox().right,
-                    this.enemy1.getHitbox().bottom,
-                    paintbrush
-            );
-            canvas.drawRect(this.enemy2.getHitbox().left,
-                    this.enemy2.getHitbox().top,
-                    this.enemy2.getHitbox().right,
-                    this.enemy2.getHitbox().bottom,
-                    paintbrush
-            );
-
-
-            // draw the bullet hitbox
-            paintbrush.setColor(Color.RED);
+            //hit box on sparrow
+            Rect sp = enemy1.getHitbox();
             paintbrush.setStyle(Paint.Style.STROKE);
-            canvas.drawRect(
-                    this.bullet.getHitbox(),
-                    paintbrush
-            );
+            canvas.drawRect(sp, paintbrush);
+
+            //hit box on bullet
+            Rect bu = bullet.getHitbox();
+            paintbrush.setStyle(Paint.Style.STROKE);
+            canvas.drawRect(bu, paintbrush);
+
+
 
 
             // DRAW GAME STATS
@@ -288,12 +268,6 @@ public class GameEngine extends SurfaceView implements Runnable {
             if (gameOver == true) {
                 canvas.drawText("GAME OVER!", 50, 200, paintbrush);
             }
-
-
-
-
-
-
 
 
             //----------------
@@ -314,6 +288,8 @@ public class GameEngine extends SurfaceView implements Runnable {
     // USER INPUT FUNCTIONS
     // ------------------------------
 
+    boolean moving = true;
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         int userAction = event.getActionMasked();
@@ -323,38 +299,59 @@ public class GameEngine extends SurfaceView implements Runnable {
 
             int Jump = 160;
 
-            if (event.getX() < this.screenWidth / 2) {
+            if (event.getX() < this.screenWidth / 2 && this.player.getxPosition() > this.VISIBLE_LEFT + this.player.image.getWidth() ) {
                 Log.d(TAG, "Person clicked LEFT side");
 
-                this.player.setxPosition(this.player.getxPosition() - Jump);
 
-                // update hitbox position
-                this.player.getHitbox().left = this.player.getxPosition();
-                this.player.getHitbox().top = this.player.getyPosition();
-                this.player.getHitbox().right = this.player.getxPosition() + this.player.getImage().getWidth();
-                this.player.getHitbox().bottom = this.player.getyPosition() + this.player.getImage().getHeight();
 
-                this.bullet.setxPosition(this.player.getxPosition());
-                this.bullet.setyPosition(this.player.getyPosition());
+                    this.updatedX = (int) event.getX();
+                    this.updatedY = (int) event.getY();
+
+                    // update player position
+                    this.player.setxPosition(this.player.getxPosition() - Jump);
+
+//                // reset bullet position
+//                this.bullet.setxPosition(this.player.getxPosition());
+//                this.bullet.setyPosition(this.player.getyPosition());
+
+                    //Upate both player and bullet hitbox
+                    this.player.updateHitbox();
+                    this.bullet.updateHitbox();
+
+
+                    moving = false;
 
             }
-            else {
+            else if (event.getX() > this.screenWidth / 2 && this.player.getxPosition() < this.VISIBLE_RIGHT - this.player.image.getWidth()   ) {
                 Log.d(TAG, "Person clicked RIGHT side");
-                this.player.setxPosition(this.player.getxPosition() + Jump);
-                // update hitbox position
-                this.player.getHitbox().left = this.player.getxPosition();
-                this.player.getHitbox().top = this.player.getyPosition();
-                this.player.getHitbox().right = this.player.getxPosition() + this.player.getImage().getWidth();
-                this.player.getHitbox().bottom = this.player.getyPosition() + this.player.getImage().getHeight();
 
-                this.bullet.setxPosition(this.player.getxPosition());
-                this.bullet.setyPosition(this.player.getyPosition());
+                // player moves to right
+                this.player.setxPosition(this.player.getxPosition() + Jump);
+
+                this.updatedX = (int)event.getX();
+                this.updatedY = (int)event.getY();
+
+//                // reset bullet position
+//                this.bullet.setxPosition(this.player.getxPosition());
+//                this.bullet.setyPosition(this.player.getyPosition());
+
+                //Upate both player and bullet hitbox
+                this.player.updateHitbox();
+                this.bullet.updateHitbox();
+
+
+                moving = true;
 
             }
 
              }
         else if (userAction == MotionEvent.ACTION_UP) {
             Log.d(TAG, "Person lifted finger");
+
+            this.bullet.setxPosition(this.player.getxPosition());
+            this.bullet.setyPosition(this.player.getyPosition());
+
+
         }
 
         return true;
