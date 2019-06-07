@@ -65,6 +65,7 @@ public class GameEngine extends SurfaceView implements Runnable {
     Sprite player;
     Sprite enemy1;
     Square bullet;
+    Sprite bg;
 
 
     // GAME STATS
@@ -100,11 +101,20 @@ public class GameEngine extends SurfaceView implements Runnable {
         // @TODO: Add your sprites
 
         // initalize sprites
+        this.bg = new Sprite(this.getContext(), 0, 0, R.drawable.background3);
         this.player = new Sprite(this.getContext(), 400, 1450, R.drawable.player_ship);
         this.enemy1 = new Sprite(this.getContext(), 100, 200, R.drawable.alien_ship1);
         this.bullet = new Square(context, 100, 700, SQUARE_WIDTH);
 
 
+    }
+
+
+    private void spawnEnemyShips() {
+        Random random = new Random();
+
+        //@TODO: Place the enemies in a random location
+        this.enemy1 = new Sprite(this.getContext(), 100, 200, R.drawable.alien_ship1);
     }
 
 
@@ -154,6 +164,14 @@ public class GameEngine extends SurfaceView implements Runnable {
     public void updatePositions() {
         // @TODO: Update position of player
 
+        this.bg.setyPosition(this.bg.getyPosition() - 15);
+
+        if(this.bg.getyPosition() + this.bg.image.getHeight() + 750 < this.VISIBLE_BOTTOM + 3500){
+            this.bg.setxPosition(0);
+            this.bg.setyPosition(0);
+
+
+        }
 
        // @TODO: Update position of enemy ships
 
@@ -209,11 +227,16 @@ public class GameEngine extends SurfaceView implements Runnable {
             //----------------
 
             // set the game's background color
-            canvas.drawColor(Color.argb(255,255,255,255));
+            canvas.drawColor(Color.argb(255,0,0,0));
 
             // setup stroke style and width
             paintbrush.setStyle(Paint.Style.FILL);
             paintbrush.setStrokeWidth(8);
+
+
+            // Draw Background
+            canvas.drawBitmap(this.bg.getImage(), this.bg.getxPosition(), this.bg.getyPosition(), paintbrush);
+
 
 
             // --------------------------------------------------------
@@ -227,7 +250,7 @@ public class GameEngine extends SurfaceView implements Runnable {
             canvas.drawBitmap(this.enemy1.getImage(), this.enemy1.getxPosition(), this.enemy1.getyPosition(), paintbrush);
 
             //3.Bullet
-            paintbrush.setColor(Color.BLACK);
+            paintbrush.setColor(Color.WHITE);
             canvas.drawRect(
                     this.bullet.getxPosition(),
                     this.bullet.getyPosition(),
@@ -243,27 +266,36 @@ public class GameEngine extends SurfaceView implements Runnable {
             // draw hitbox on player
             // --------------------------------------------------------
             Rect r = player.getHitbox();
+            paintbrush.setColor(Color.BLACK);
             paintbrush.setStyle(Paint.Style.STROKE);
             canvas.drawRect(r, paintbrush);
 
             //hit box on sparrow
             Rect sp = enemy1.getHitbox();
+            paintbrush.setColor(Color.BLACK);
             paintbrush.setStyle(Paint.Style.STROKE);
             canvas.drawRect(sp, paintbrush);
 
             //hit box on bullet
             Rect bu = bullet.getHitbox();
+            paintbrush.setColor(Color.BLACK);
             paintbrush.setStyle(Paint.Style.STROKE);
             canvas.drawRect(bu, paintbrush);
 
 
 
 
-            // DRAW GAME STATS
+            // DRAW GAME STATS / HUDs
 
-            paintbrush.setTextSize(100);     // set font size
+            paintbrush.setTextSize(60);     // set font size
+            paintbrush.setColor(Color.RED);
             paintbrush.setStrokeWidth(5);  // make text narrow
-            canvas.drawText("Lives: " + this.lives, 50, 100, paintbrush);
+            canvas.drawText("Score: " + this.score, 50, 100, paintbrush);
+
+            paintbrush.setTextSize(60);// set font size
+            paintbrush.setColor(Color.RED);
+            paintbrush.setStrokeWidth(5);  // make text narrow
+            canvas.drawText("Lives: " + this.lives, 830, 100, paintbrush);
 
             if (gameOver == true) {
                 canvas.drawText("GAME OVER!", 50, 200, paintbrush);
