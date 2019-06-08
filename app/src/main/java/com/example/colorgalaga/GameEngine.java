@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -13,6 +14,8 @@ import android.view.SurfaceView;
 
 import java.util.ArrayList;
 import java.util.Random;
+
+import static java.lang.Thread.sleep;
 
 public class GameEngine extends SurfaceView implements Runnable {
 
@@ -39,12 +42,8 @@ public class GameEngine extends SurfaceView implements Runnable {
 
     //bullet width
     int SQUARE_WIDTH = 50;
-    boolean enemyIsMovingDown = true;
-    boolean colision = false;
 
-    int initialPlayerY;
-    int initialPlayerX;
-
+    // touch variables
     int updatedY;
     int updatedX;
 
@@ -55,6 +54,9 @@ public class GameEngine extends SurfaceView implements Runnable {
     int VISIBLE_RIGHT;
     int VISIBLE_BOTTOM;
 
+    //Random
+    int randX = 0;
+    int randY = 0;
 
     // Multiple bullets
     ArrayList<Square> bullets = new ArrayList<Square>();
@@ -70,11 +72,18 @@ public class GameEngine extends SurfaceView implements Runnable {
     Square bullet;
     Sprite bg;
     Sprite blast;
+    Sprite theEnd;
+
 
 
     // GAME STATS
     int score = 0;
     int lives = 3;
+
+    //flags
+    boolean gameOver = false;
+    boolean enemyHit = false;
+    boolean bulletHit = false;
 
 
 
@@ -110,17 +119,11 @@ public class GameEngine extends SurfaceView implements Runnable {
         this.enemy1 = new Sprite(this.getContext(), 100, 200, R.drawable.alien_ship1);
         this.bullet = new Square(context, 100, 700, SQUARE_WIDTH);
         this.blast = new Sprite(this.getContext(), 400, 1450, R.drawable.boom);
+        this.theEnd = new Sprite(this.getContext(), 400, 1450, R.drawable.gameover);
 
 
     }
 
-
-    private void spawnEnemyShips() {
-        Random random = new Random();
-
-        //@TODO: Place the enemies in a random location
-        this.enemy1 = new Sprite(this.getContext(), 100, 200, R.drawable.alien_ship1);
-    }
 
 
     // ------------------------------
@@ -158,11 +161,6 @@ public class GameEngine extends SurfaceView implements Runnable {
     // GAME ENGINE FUNCTIONS
     // - update, draw, setFPS
     // ------------------------------
-
-
-    final int PLAYER_SPEED = 30;
-    final int ENEMY_SPEED = 45;
-    boolean gameOver = false;
 
 
 
@@ -212,16 +210,35 @@ public class GameEngine extends SurfaceView implements Runnable {
 
         if (this.enemy1.getyPosition() > this.VISIBLE_BOTTOM ){
 
-            this.enemy1.setyPosition(100);
-            this.enemy1.setyPosition(200);
+            //Random Sparrow position
+            Random r = new Random();
+            this.randX = r.nextInt(this.screenWidth) +1 ;
+            this.randY = r.nextInt(this.screenHeight/2 - 400) + 1;
+
+            this.enemy1.setxPosition(this.randX);
+            this.enemy1.setyPosition(this.randY);
+
+            //Upate enemy hitbox
+            this.enemy1.updateHitbox();
         }
 
 
         // @TODO: Collision detection between player and enemy
 
-        // Colision of bullet and enemy
+        // Colision of player and enemy
         if (player.getHitbox().intersect(enemy1.getHitbox())) {
-            colision = true;
+            this.enemyHit = true;
+
+            this.enemy1.setyPosition(this.randX);
+            this.enemy1.setyPosition(this.randY);
+            this.lives = this.lives - 1;
+
+            if(this.lives <= 0){
+                this.gameOver = true;
+            }
+
+            //Upate enemy hitbox
+            this.enemy1.updateHitbox();
         }
 
         // @TODO: Chasing code form bullet to enemy
@@ -255,18 +272,23 @@ public class GameEngine extends SurfaceView implements Runnable {
 
         }
 
-
         //Upate hitbox
         this.bullet.updateHitbox();
 
         // Colision of bullet and enemy
         if (bullet.getHitbox().intersect(enemy1.getHitbox())) {
-            //colision = true;
-        }
+            this.bulletHit = true;
+            this.enemy1.setyPosition(this.randX);
+            this.enemy1.setyPosition(this.randY);
 
+            //Upate enemy hitbox
+            this.enemy1.updateHitbox();
 
-}
+            //increase the score
+            this.score = this. score + 1;
+         }
 
+    }
 
 
 
@@ -312,6 +334,7 @@ public class GameEngine extends SurfaceView implements Runnable {
 
 
 
+
             // --------------------------------------------------------
             // draw hitbox on player
             // --------------------------------------------------------
@@ -347,21 +370,29 @@ public class GameEngine extends SurfaceView implements Runnable {
             paintbrush.setStrokeWidth(5);  // make text narrow
             canvas.drawText("Lives: " + this.lives, 830, 100, paintbrush);
 
-            if (gameOver == true) {
-                canvas.drawText("GAME OVER!", 50, 200, paintbrush);
-            }
+            //-------------------------------------
+            // Colision Updates
+            //--------------------------------------
 
-            if (colision == true) {
-
+            if (this.enemyHit) {
                 canvas.drawBitmap(this.blast.getImage(), this.player.getxPosition()- 50, this.player.getyPosition()- 50 , paintbrush);
+            }
 
-
-
+            if (this.gameOver) {
+                canvas.drawBitmap(this.theEnd.getImage(), this.screenWidth/2 - 300, this.screenHeight/2 - 400 , paintbrush);
+                try {
+                    gameThread.sleep(2000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
 
 
 
+            if (this.bulletHit == true) {
+              // canvas.drawBitmap(this.blast.getImage(), this.enemy1.getxPosition()- 50, this.enemy1.getyPosition()- 50 , paintbrush);
 
+            }
 
 
             //----------------
@@ -371,7 +402,7 @@ public class GameEngine extends SurfaceView implements Runnable {
 
     public void setFPS() {
         try {
-            gameThread.sleep(17);
+            sleep(17);
         }
         catch (Exception e) {
 
@@ -392,6 +423,7 @@ public class GameEngine extends SurfaceView implements Runnable {
             Log.d(TAG, "Person tapped the screen");
 
             int Jump = 160;
+            this.enemyHit = false;
 
             if (event.getX() < this.screenWidth / 2 && this.player.getxPosition() > this.VISIBLE_LEFT + this.player.image.getWidth() ) {
                 Log.d(TAG, "Person clicked LEFT side");
@@ -404,9 +436,9 @@ public class GameEngine extends SurfaceView implements Runnable {
                     // update player position
                     this.player.setxPosition(this.player.getxPosition() - Jump);
 
-//                // reset bullet position
-//                this.bullet.setxPosition(this.player.getxPosition());
-//                this.bullet.setyPosition(this.player.getyPosition());
+                // reset bullet position
+                this.bullet.setxPosition(this.player.getxPosition());
+                this.bullet.setyPosition(this.player.getyPosition());
 
                     //Upate both player and bullet hitbox
                     this.player.updateHitbox();
@@ -425,14 +457,9 @@ public class GameEngine extends SurfaceView implements Runnable {
                 this.updatedX = (int)event.getX();
                 this.updatedY = (int)event.getY();
 
-//                // reset bullet position
-//                this.bullet.setxPosition(this.player.getxPosition());
-//                this.bullet.setyPosition(this.player.getyPosition());
 
                 //Upate both player and bullet hitbox
                 this.player.updateHitbox();
-                this.bullet.updateHitbox();
-
 
                 moving = true;
 
