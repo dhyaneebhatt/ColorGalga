@@ -1,5 +1,7 @@
 package com.example.colorgalaga;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -38,6 +40,7 @@ public class GameEngine extends SurfaceView implements Runnable {
     //bullet width
     int SQUARE_WIDTH = 50;
     boolean enemyIsMovingDown = true;
+    boolean colision = false;
 
     int initialPlayerY;
     int initialPlayerX;
@@ -66,6 +69,7 @@ public class GameEngine extends SurfaceView implements Runnable {
     Sprite enemy1;
     Square bullet;
     Sprite bg;
+    Sprite blast;
 
 
     // GAME STATS
@@ -102,9 +106,10 @@ public class GameEngine extends SurfaceView implements Runnable {
 
         // initalize sprites
         this.bg = new Sprite(this.getContext(), 0 , -4000, R.drawable.background3);
-        this.player = new Sprite(this.getContext(), 400, 1450, R.drawable.player_ship);
+        this.player = new Sprite(this.getContext(), 400, 1300, R.drawable.player_ship);
         this.enemy1 = new Sprite(this.getContext(), 100, 200, R.drawable.alien_ship1);
         this.bullet = new Square(context, 100, 700, SQUARE_WIDTH);
+        this.blast = new Sprite(this.getContext(), 400, 1450, R.drawable.boom);
 
 
     }
@@ -162,23 +167,62 @@ public class GameEngine extends SurfaceView implements Runnable {
 
 
     public void updatePositions() {
-        // @TODO: Update position of player
+        // @TODO: Update position of Background to make it loop
 
         this.bg.setyPosition(this.bg.getyPosition() + 25);
 
         if(this.bg.getyPosition() > this.VISIBLE_BOTTOM - 2500 ){
             this.bg.setxPosition(0);
             this.bg.setyPosition(-4200);
-
-
         }
 
        // @TODO: Update position of enemy ships
 
+        // 1. calculate distance between bullet and enemy
+        double a1 = this.player.getxPosition() - this.enemy1.getxPosition();
+        double b1 = this.player.getyPosition() - this.enemy1.getyPosition();
+
+        // d = sqrt(a^2 + b^2)
+
+        double d1 = Math.sqrt((a1 * a1) + (b1* b1));
+
+        Log.d(TAG, "Distance to enemy: " + d1);
+
+        // 2. calculate xn and yn constants
+        // (amount of x to move, amount of y to move)
+        double xn1 = (a1 / d1);
+        double yn1 = (b1 / d1);
+
+        // 3. calculate new (x,y) coordinates
+        int newX1 = this.enemy1.getxPosition() + (int) (xn1 * 5);
+        int newY1 = this.enemy1.getyPosition() + (int) (yn1 * 5);
+
+        this.enemy1.setxPosition(newX1 );
+        this.enemy1.setyPosition(newY1 );
+
+        //Upate enemy hitbox
+        this.enemy1.updateHitbox();
+
+        if (this.enemy1.getyPosition() == newY1 && this.enemy1.getxPosition() == newX1 ){
+
+            this.enemy1.setyPosition(this.enemy1.getyPosition());
+            this.enemy1.setyPosition(this.enemy1.getyPosition() + 20);
+
+        }
+
+        if (this.enemy1.getyPosition() > this.VISIBLE_BOTTOM ){
+
+            this.enemy1.setyPosition(100);
+            this.enemy1.setyPosition(200);
+        }
 
 
-       // @TODO: Collision detection between player and enemy
+        // @TODO: Collision detection between player and enemy
 
+        // Colision of bullet and enemy
+        if (player.getHitbox().intersect(enemy1.getHitbox())) {
+            colision = true;
+        }
 
         // @TODO: Chasing code form bullet to enemy
 
@@ -211,17 +255,15 @@ public class GameEngine extends SurfaceView implements Runnable {
 
         }
 
+
         //Upate hitbox
         this.bullet.updateHitbox();
 
         // Colision of bullet and enemy
         if (bullet.getHitbox().intersect(enemy1.getHitbox())) {
-
-            // UPDATE THE cage movement
-            this.enemy1.setxPosition(400);
-            this.enemy1.updateHitbox();
-
+            //colision = true;
         }
+
 
 }
 
@@ -251,10 +293,10 @@ public class GameEngine extends SurfaceView implements Runnable {
             // draw player, enemy and bullet
             // --------------------------------------------------------
 
-            // 1. player
+            // 1. Player
             canvas.drawBitmap(this.player.getImage(), this.player.getxPosition(), this.player.getyPosition(), paintbrush);
 
-            // 2. sparrow
+            // 2. Enemy
             canvas.drawBitmap(this.enemy1.getImage(), this.enemy1.getxPosition(), this.enemy1.getyPosition(), paintbrush);
 
             //3.Bullet
@@ -308,6 +350,18 @@ public class GameEngine extends SurfaceView implements Runnable {
             if (gameOver == true) {
                 canvas.drawText("GAME OVER!", 50, 200, paintbrush);
             }
+
+            if (colision == true) {
+
+                canvas.drawBitmap(this.blast.getImage(), this.player.getxPosition()- 50, this.player.getyPosition()- 50 , paintbrush);
+
+
+
+            }
+
+
+
+
 
 
             //----------------
