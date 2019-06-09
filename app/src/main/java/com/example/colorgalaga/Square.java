@@ -9,6 +9,9 @@ public class Square {
     private int yPosition;
     private int width;
 
+    private int initialX;
+    private int initialY;
+
     // make the hitbox
     Rect hitbox;
 
@@ -20,6 +23,9 @@ public class Square {
         this.xPosition = x;
         this.yPosition = y;
         this.width = width;
+
+        this.initialX = x;
+        this.initialY = y;
 
         this.hitbox = new Rect(
                 this.xPosition,
@@ -45,6 +51,24 @@ public class Square {
     // ---------------------------------
     // sets or gets the xd variable for this sprite
     // ---------------------------------
+
+
+    public int getInitialX() {
+        return initialX;
+    }
+
+    public void setInitialX(int initialX) {
+        this.initialX = initialX;
+    }
+
+    public int getInitialY() {
+        return initialY;
+    }
+
+    public void setInitialY(int initialY) {
+        this.initialY = initialY;
+    }
+
     public double getXn() {
         return xn;
     }
