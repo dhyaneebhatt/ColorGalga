@@ -7,7 +7,7 @@ import android.view.Display;
 
 public class MainActivity extends AppCompatActivity {
 
-    GameEngine tappySpaceship;
+    GameEngine ColorGala;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,23 +20,23 @@ public class MainActivity extends AppCompatActivity {
 
         // Initialize the GameEngine object
         // Pass it the screen size (height & width)
-        tappySpaceship = new GameEngine(this, size.x, size.y);
+        ColorGala = new GameEngine(this, size.x, size.y);
 
         // Make GameEngine the view of the Activity
-        setContentView(tappySpaceship);
+        setContentView(ColorGala);
     }
 
     // Android Lifecycle function
     @Override
     protected void onResume() {
         super.onResume();
-        tappySpaceship.startGame();
+        ColorGala.startGame();
     }
 
     // Stop the thread in snakeEngine
     @Override
     protected void onPause() {
         super.onPause();
-        tappySpaceship.pauseGame();
+        ColorGala.pauseGame();
     }
 }
