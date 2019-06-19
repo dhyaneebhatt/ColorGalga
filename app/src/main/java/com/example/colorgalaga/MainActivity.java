@@ -4,10 +4,12 @@ import android.graphics.Point;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Display;
+import android.media.MediaPlayer;
 
 public class MainActivity extends AppCompatActivity {
 
     GameEngine ColorGala;
+    MediaPlayer bkground;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,7 +26,13 @@ public class MainActivity extends AppCompatActivity {
 
         // Make GameEngine the view of the Activity
         setContentView(ColorGala);
+
+        bkground = MediaPlayer.create(this,R.raw.backgroundsound);
+        bkground.setLooping(true);
+        bkground.start();
     }
+
+
 
     // Android Lifecycle function
     @Override
@@ -38,5 +46,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         ColorGala.pauseGame();
+        bkground.release();
     }
 }

@@ -7,16 +7,24 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
+import android.media.SoundPool;
+import android.media.AudioManager;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Random;
-
 import static java.lang.Thread.sleep;
+
+
+
+
+
+
+
 
 public class GameEngine extends SurfaceView implements Runnable {
 
@@ -63,6 +71,18 @@ public class GameEngine extends SurfaceView implements Runnable {
     int i;
 
 
+    //timer
+    // Minimal x and y axis swipe distance.
+    int MIN_SWIPE_DISTANCE_X = 100;
+    int MIN_SWIPE_DISTANCE_Y = 100;
+
+    // Maximal x and y axis swipe distance.
+    int MAX_SWIPE_DISTANCE_X = 1000;
+    int MAX_SWIPE_DISTANCE_Y = 1000;
+
+    int touchUpx;
+    int touchUpy;
+
 
     // ----------------------------
     // ## SPRITES
@@ -84,6 +104,12 @@ public class GameEngine extends SurfaceView implements Runnable {
     ArrayList <Enemy> enemy2 = new ArrayList<Enemy>();
     ArrayList <Enemy> enemyRed = new ArrayList<Enemy>();
     ArrayList <Enemy> enemyBlue = new ArrayList<Enemy>();
+
+
+
+    //Sound
+    SoundPool sounds;
+    int bulletsound;
 
 
 
@@ -141,6 +167,11 @@ public class GameEngine extends SurfaceView implements Runnable {
 
 
         this.spawnEnemy();
+
+
+        //Sound
+        this.sounds = new SoundPool(10,AudioManager.STREAM_MUSIC,0);
+        this.bulletsound = sounds.load(context,R.raw.bulletsound,1);
     }
 
 
@@ -276,14 +307,14 @@ public class GameEngine extends SurfaceView implements Runnable {
         for (Enemy temp : enemy2) {
 
             if (temp.xPosition > screenWidth - 200) {
-                Log.d(TAG, "Ball reached RIGHT of screen. Changing direction!");
+               // Log.d(TAG, "Ball reached RIGHT of screen. Changing direction!");
                 balls = false;
                 // update score
 
             }
 
             if (temp.xPosition < 100) {
-                Log.d(TAG, "Ball reached LEFT of screen. Changing direction!");
+               // Log.d(TAG, "Ball reached LEFT of screen. Changing direction!");
                 balls = true;
 
             }
@@ -292,14 +323,14 @@ public class GameEngine extends SurfaceView implements Runnable {
             for (Enemy temp1 : enemyRed) {
 
                 if (temp1.xPosition > screenWidth - 200) {
-                    Log.d(TAG, "Ball reached RIGHT of screen. Changing direction!");
+                   // Log.d(TAG, "Ball reached RIGHT of screen. Changing direction!");
                     balls = false;
                     // update score
 
                 }
 
                 if (temp1.xPosition < 100) {
-                    Log.d(TAG, "Ball reached LEFT of screen. Changing direction!");
+                   // Log.d(TAG, "Ball reached LEFT of screen. Changing direction!");
                     balls = true;
 
                 }
@@ -308,14 +339,14 @@ public class GameEngine extends SurfaceView implements Runnable {
                 for (Enemy temp2 : enemyBlue) {
 
                     if (temp2.xPosition > screenWidth - 200) {
-                        Log.d(TAG, "Ball reached RIGHT of screen. Changing direction!");
+                       // Log.d(TAG, "Ball reached RIGHT of screen. Changing direction!");
                         balls = false;
                         // update score
 
                     }
 
                     if (temp2.xPosition < 100) {
-                        Log.d(TAG, "Ball reached LEFT of screen. Changing direction!");
+                   //     Log.d(TAG, "Ball reached LEFT of screen. Changing direction!");
                         balls = true;
 
                     }
@@ -447,39 +478,16 @@ public class GameEngine extends SurfaceView implements Runnable {
 
 
 
-        // @TODO: Update position of bomb ships
+        // @TODO: Update position of bomb
 
-            this.bomb.setyPosition(this.bomb.getyPosition() + 20);
+            this.bomb.setyPosition(this.bomb.getyPosition() - 20);
 
 
-        if (this.bomb.getyPosition() > this.VISIBLE_BOTTOM ){
-           this.rewardbomb = false;
-
-            //Random bomb position
-            Random r = new Random();
-            this.randX = r.nextInt(this.screenWidth) +1 ;
-            this.randY = r.nextInt(this.screenHeight) + 1;
-
-            this.bomb.setxPosition(randX);
-            this.bomb.setyPosition(randY);
+        if (this.bomb.getyPosition() > this.VISIBLE_TOP ){
+           //this.rewardbomb = false;
         }
 
-        // @TODO: Collision detection between player and bomb
-
-        // Colision of player and bomb
-        if (player.getHitbox().intersect(bomb.getHitbox())) {
-
-            this.bomb.setxPosition(this.randX);
-            this.bomb.setyPosition(this.randY);
-
-            this.rewardbomb = false;
-
-            //Upate enemy hitbox
-            this.bomb.updateHitbox();
-
-            //Upate player hitbox
-            this.player.updateHitbox();
-        }
+        // @TODO: Collision detection between enemy and bomb
 
 //
 //        // @TODO: Update position of shield ships
@@ -685,15 +693,49 @@ public class GameEngine extends SurfaceView implements Runnable {
         int userAction = event.getActionMasked();
         //@TODO: What should happen when person touches the screen?
         if (userAction == MotionEvent.ACTION_DOWN) {
-            Log.d(TAG, "Person tapped the screen");
+          //  Log.d(TAG, "Person tapped the screen");
+
+            //---------------------
+            // Swipe Effect
+            //---------------------
 
 
+            // Get swipe delta value in y axis.
+            int deltaY = (int)event.getY() - this.touchUpy;
+
+
+            if((deltaY>= MIN_SWIPE_DISTANCE_Y) && (deltaY <= MAX_SWIPE_DISTANCE_Y))
+            {
+                if(deltaY > 0)
+                {
+                    //this.activity.displayMessage("Swipe to up");
+                    Log.d(TAG, "Swipe to up");
+
+                    this.bomb.setxPosition(this.player.getxPosition());
+                    this.bomb.setyPosition(this.player.getyPosition());
+
+                    rewardbomb = true;
+
+                }else
+                {
+                    //this.activity.displayMessage("Swipe to down");
+                    Log.d(TAG, "Swipe to down");
+
+                    rewardbomb = true;
+                }
+            }
+
+
+            //----------------------
+            // Player Movement
+            //-----------------------
 
             int Jump = 160;
             this.enemyHit = false;
 
             if (event.getX() < this.screenWidth / 2 && this.player.getxPosition() > this.VISIBLE_LEFT + this.player.image.getWidth() ) {
-                Log.d(TAG, "Person clicked LEFT side");
+               // Log.d(TAG, "Person clicked LEFT side");
+
 
 
 
@@ -714,12 +756,16 @@ public class GameEngine extends SurfaceView implements Runnable {
 
                     //this.bullet.updateHitbox();
 
+                sounds.play(bulletsound,1.0f,1.0f,0,0,1.5f);
+
+
+
 
                     moving = false;
 
             }
             else if (event.getX() > this.screenWidth / 2 && this.player.getxPosition() < this.VISIBLE_RIGHT - this.player.image.getWidth()   ) {
-                Log.d(TAG, "Person clicked RIGHT side");
+               // Log.d(TAG, "Person clicked RIGHT side");
 
                 // player moves to right
                 this.player.setxPosition(this.player.getxPosition() + Jump);
@@ -733,19 +779,26 @@ public class GameEngine extends SurfaceView implements Runnable {
 
 
 
+                sounds.play(bulletsound,1.0f,1.0f,0,0,1.5f);
 
             }
 
              }
         else if (userAction == MotionEvent.ACTION_UP) {
-            Log.d(TAG, "Person lifted finger");
+           // Log.d(TAG, "Person lifted finger");
+
+            this.touchUpx = (int) event.getX();
+            this.touchUpx = (int) event.getY();
 
 
                this.bullet.setxPosition(this.player.getxPosition());
                this.bullet.setyPosition(this.player.getyPosition());
 
+
             //Upate both player and bullet hitbox
             this.bullet.updateHitbox();
+
+            //sounds.play(bulletsound,1.0f,1.0f,0,0,1.5f);
 
 
         }
