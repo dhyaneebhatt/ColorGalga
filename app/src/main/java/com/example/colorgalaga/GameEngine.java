@@ -163,32 +163,24 @@ public class GameEngine extends SurfaceView implements Runnable {
 
         for (i = 0; i<5; i++) {
 
-            enemy2initialX = enemy2initialX +150;
+            enemy2initialX = enemy2initialX + 130;
 
             enemy = new Enemy(this.getContext(), enemy2initialX, enemy2initialY);
             enemy2.add(enemy);
-           // Log.d("enemy","added");
-        }
+            // Log.d("enemy","added");
 
-        for (i = 0; i<5; i++) {
-
-            enemyRedinitialX = enemyRedinitialX +150;
+            enemyRedinitialX = enemyRedinitialX + 130;
 
             enemy = new Enemy(this.getContext(), enemyRedinitialX, enemyRedinitialY);
             enemyRed.add(enemy);
-           // Log.d("enemy","added");
-        }
+            // Log.d("enemy","added");
 
-
-        for (i = 0; i<5; i++) {
-
-            enemyBlueinitialX = enemyBlueinitialX +150;
+            enemyBlueinitialX = enemyBlueinitialX + 130;
 
             enemy = new Enemy(this.getContext(), enemyBlueinitialX, enemyBlueinitialY);
             enemyBlue.add(enemy);
             //Log.d("enemy","added");
         }
-
 
 
 
@@ -412,11 +404,11 @@ public class GameEngine extends SurfaceView implements Runnable {
 //        }
 
 
-//
+
 //        // @TODO: Collision detection between player and enemy
 //
 //        // Colision of player and enemy
-//        if (player.getHitbox().intersect(enemy1.getHitbox())) {
+//         if (player.getHitbox().intersect(enemy1.getHitbox())) {
 //            this.enemyHit = true;
 //
 //            this.enemy1.setxPosition(this.randX);
@@ -436,11 +428,11 @@ public class GameEngine extends SurfaceView implements Runnable {
 //            this.enemy1.updateHitbox();
 //
 //            //Upate player hitbox
-//            this.player.updateHitbox();
+//           this.player.updateHitbox();
 //        }
 
         //}
-//
+
 
 
         // @TODO: Chasing code form bullet to enemy
@@ -558,21 +550,25 @@ public class GameEngine extends SurfaceView implements Runnable {
             // 1. Player
             canvas.drawBitmap(this.player.getImage(), this.player.getxPosition(), this.player.getyPosition(), paintbrush);
 
+
             // 2. Enemy
            // canvas.drawBitmap(this.enemy1.getImage(), this.enemy1.getxPosition(), this.enemy1.getyPosition(), paintbrush);
 
             for (Enemy temp : enemy2) {
                 canvas.drawBitmap(temp.getBitmap(), temp.getXPosition(), temp.getYPosition(), paintbrush);
+                temp.getHitbox();
 
             }
 
             for (Enemy temp : enemyRed) {
                 canvas.drawBitmap(temp.getImage2(), temp.getXPosition(), temp.getYPosition(), paintbrush);
+                temp.getHitbox();
 
             }
 
             for (Enemy temp : enemyBlue) {
                 canvas.drawBitmap(temp.getImage3(), temp.getXPosition(), temp.getYPosition(), paintbrush);
+                temp.getHitbox();
 
             }
 
