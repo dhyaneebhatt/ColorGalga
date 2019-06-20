@@ -1,7 +1,11 @@
 package com.example.colorgalaga;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Rect;
+
+import static com.example.colorgalaga.R.drawable.alien_ship1;
 
 public class Square {
 
@@ -12,6 +16,8 @@ public class Square {
     private int initialX;
     private int initialY;
 
+    Bitmap image1;
+
     // make the hitbox
     Rect hitbox;
 
@@ -19,10 +25,11 @@ public class Square {
     double xn = 0;
     double yn = 0;
 
-    public Square(Context context, int x, int y, int width) {
+    public Square(Context context, int x, int y) {
         this.xPosition = x;
         this.yPosition = y;
         this.width = width;
+        this.image1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.lazer);
 
         this.initialX = x;
         this.initialY = y;
@@ -112,4 +119,11 @@ public class Square {
     public void setHitbox(Rect hitbox) {
         this.hitbox = hitbox;
     }
+
+
+    public Bitmap getImage1() { return image1; }
+
+    public void setImage1(Bitmap image1) { this.image1 = image1; }
+
+
 }

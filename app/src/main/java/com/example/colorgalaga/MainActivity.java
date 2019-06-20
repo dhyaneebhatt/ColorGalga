@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
 
         bkground = MediaPlayer.create(this,R.raw.backgroundsound);
         bkground.setLooping(true);
-        bkground.start();
+        //bkground.start();
     }
 
 
