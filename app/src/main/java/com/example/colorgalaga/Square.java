@@ -92,6 +92,8 @@ public class Square {
         this.yn = yn;
     }
 
+    public void setyPosition(int yPosition) { this.yPosition = yPosition; }
+
     public int getxPosition() {
         return xPosition;
     }
@@ -104,9 +106,6 @@ public class Square {
         return yPosition;
     }
 
-    public void setyPosition(int yPosition) {
-        this.yPosition = yPosition;
-    }
 
     public int getWidth() {
         return width;
@@ -124,6 +123,5 @@ public class Square {
     public Bitmap getImage1() { return image1; }
 
     public void setImage1(Bitmap image1) { this.image1 = image1; }
-
 
 }

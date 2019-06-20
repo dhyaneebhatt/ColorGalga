@@ -162,7 +162,7 @@ public class GameEngine extends SurfaceView implements Runnable {
 
         // initalize multiple sprites added in seperate spawn functions
         this.spawnEnemy();
-        this.spawnbullets();
+        this.spawnBullet();
 
 
         //initalize Sound
@@ -212,15 +212,30 @@ public class GameEngine extends SurfaceView implements Runnable {
     }
 
 
-    private void spawnbullets() {
+//    int bulletinitialX = 100;
+//    int bulletinitialY  = 1000;
+
+    private void spawnBullet() {
 
         // @TODO: make multiple bullets
-        
+
+//        for (i = 0; i<100; i++) {
+//
+//           // bulletinitialY = bulletinitialY - 30;
+//
+//            // Create and add bullet in arraylist
+//            bullet = new Square(this.getContext(), this.player.getxPosition(),this.player.getyPosition());
+//            bullets.add(bullet);
+//            Log.d(TAG, "bullet added");
+//        }
+
+        // Make a new bullet and add it to the bullets array
+        // Set the initial position of the bullet to the player's position
+        Square b = new Square(this.getContext(), this.player.getxPosition(), this.player.getyPosition());
+        this.bullets.add(b);
 
 
     }
-
-
 
 
     // ------------------------------
@@ -260,7 +275,7 @@ public class GameEngine extends SurfaceView implements Runnable {
     // ------------------------------
 
     boolean wall = true;
-    final int ENEMY_SPEED = 5;
+    final int ENEMY_SPEED = 3;
 
     public void updatePositions() {
 
@@ -372,7 +387,7 @@ public class GameEngine extends SurfaceView implements Runnable {
 
             double d1 = Math.sqrt((a1 * a1) + (b1 * b1));
 
-            Log.d(TAG, "Distance to enemy: " + d1);
+            //Log.d(TAG, "Distance to enemy: " + d1);
 
             // 2. calculate xn and yn constants
             // (amount of x to move, amount of y to move)
@@ -424,7 +439,7 @@ public class GameEngine extends SurfaceView implements Runnable {
 
                 double d2 = Math.sqrt((a2 * a2) + (b2 * b2));
 
-                Log.d(TAG, "Distance to enemy: " + d2);
+               // Log.d(TAG, "Distance to enemy: " + d2);
 
                 // 2. calculate xn and yn constants
                 // (amount of x to move, amount of y to move)
@@ -478,7 +493,7 @@ public class GameEngine extends SurfaceView implements Runnable {
 
                 double d2 = Math.sqrt((a2 * a2) + (b2 * b2));
 
-                Log.d(TAG, "Distance to enemy: " + d2);
+                //Log.d(TAG, "Distance to enemy: " + d2);
 
                 // 2. calculate xn and yn constants
                 // (amount of x to move, amount of y to move)
@@ -552,6 +567,33 @@ public class GameEngine extends SurfaceView implements Runnable {
 
         // @TODO: Chasing code form bullet to enemy
 
+//        for (Square temp : bullets) {
+//
+//            temp.setxPosition(this.player.getxPosition());
+//            temp.setyPosition(this.player.getyPosition());
+//
+//        }
+
+
+        for (int p = 0; p < this.bullets.size(); p++) {
+
+            Square bullet = this.bullets.get(p);
+            bullet.setyPosition(bullet.getyPosition() - 10);
+            bullet.updateHitbox();
+            Log.d(TAG, "Bullet position: " + bullet.getyPosition());
+//            Square lastbullet = this.bullets.get(this.bullets.size() - 1);
+//
+//
+//            lastbullet.setyPosition(lastbullet.getyPosition() - ENEMY_SPEED);
+//
+            if (bullet.getyPosition() < this.VISIBLE_TOP) {
+                // remove bullet from screen
+                bullets.remove(bullet);
+            }
+
+
+
+        } // end for loop of bullets
 
 
 
@@ -566,6 +608,8 @@ public class GameEngine extends SurfaceView implements Runnable {
         }
 
         // @TODO: Collision detection between bomb and enemy
+
+
 
 //
 //        // @TODO: Update position of shield ships
@@ -678,7 +722,7 @@ public class GameEngine extends SurfaceView implements Runnable {
                         paintbrush
                 );
 
-            }
+            } // Draw enemy ends
 
             //--------------------------------
             // DRAW GAME STATS / HUDs
@@ -700,15 +744,39 @@ public class GameEngine extends SurfaceView implements Runnable {
             // Conditional Updates
             //--------------------------------------
 
-            if (this.newbullet) {
+
+            //draw bullet if true
 
 
+
+
+
+            // this gets draw the first time
+            for (int i = 0; i < this.bullets.size(); i++) {
+                Log.d(TAG,"Drawing bullet");
+                Square temp = this.bullets.get(i);
+                //canvas.drawBitmap(temp.getImage1(), this.player.getxPosition(), this.player.getyPosition(), paintbrush);
+                canvas.drawBitmap(temp.getImage1(), temp.getxPosition(), temp.getyPosition(), paintbrush);
+
+                // 3. draw the enemies's hitbox
+                paintbrush.setColor(Color.RED);
+                paintbrush.setStyle(Paint.Style.STROKE);
+                canvas.drawRect(
+                        temp.getHitbox(),
+                        paintbrush
+                );
             }
 
+
+
+            // draw blast when enemy hits the player if true
             if (this.enemyHit) {
                 canvas.drawBitmap(this.blast.getImage(), this.player.getxPosition() - 50, this.player.getyPosition() - 50, paintbrush);
             }
 
+
+
+            // draw game over if true
             if (this.gameOver) {
                 canvas.drawBitmap(this.theEnd.getImage(), this.screenWidth / 2 - 300, this.screenHeight / 2 - 400, paintbrush);
                 try {
@@ -718,11 +786,9 @@ public class GameEngine extends SurfaceView implements Runnable {
                 }
             }
 
-            if (this.bulletHit == true) {
 
 
-            }
-
+            // draw Wepon of Mass Distruction if true
             if (this.rewardbomb) {
                 // 2. Reward
                 canvas.drawBitmap(this.bomb.getImage(), this.bomb.getxPosition(), this.bomb.getyPosition(), paintbrush);
@@ -738,7 +804,9 @@ public class GameEngine extends SurfaceView implements Runnable {
             //----------------
             this.holder.unlockCanvasAndPost(canvas);
         }
-    }
+
+    } // ReDraw) ends
+
 
     public void setFPS() {
         try {
@@ -783,7 +851,6 @@ public class GameEngine extends SurfaceView implements Runnable {
                 {
                     // Swipe up
                     // Log.d(TAG, "Swipe to up");
-
                     this.bomb.setxPosition(this.player.getxPosition());
                     this.bomb.setyPosition(this.player.getyPosition());
 
@@ -806,8 +873,10 @@ public class GameEngine extends SurfaceView implements Runnable {
             // player touches left side
             //-----------------------------
 
+
+
             if (event.getX() < this.screenWidth / 2 && this.player.getxPosition() > this.VISIBLE_LEFT + this.player.image.getWidth() ) {
-               // Log.d(TAG, "Person clicked LEFT side");
+                   // Log.d(TAG, "Person clicked LEFT side");
 
                     //Store the touch postion
                     this.updatedX = (int) event.getX();
@@ -821,6 +890,9 @@ public class GameEngine extends SurfaceView implements Runnable {
 
                     //Upate both player's hitbox
                     this.player.updateHitbox();
+
+
+                    this.spawnBullet();
 
                     // play bullet sound
                     //sounds.play(bulletsound,1.0f,1.0f,0,0,1.5f);
@@ -846,14 +918,15 @@ public class GameEngine extends SurfaceView implements Runnable {
                 this.updatedY = (int)event.getY();
 
 
-                //Draw bullet
-                this.newbullet = true;
-
                 //Upate both player's hitbox
                 this.player.updateHitbox();
 
+
+                // make new bullet
+                this.spawnBullet();
+
                 // Play Bullet Sound
-               // sounds.play(bulletsound,1.0f,1.0f,0,0,1.5f);
+                //sounds.play(bulletsound,1.0f,1.0f,0,0,1.5f);
 
             }
 
