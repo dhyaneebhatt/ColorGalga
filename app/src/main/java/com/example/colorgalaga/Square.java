@@ -29,7 +29,7 @@ public class Square {
         this.xPosition = x;
         this.yPosition = y;
         this.width = width;
-        this.image1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.lazer);
+        this.image1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.shield);
 
         this.initialX = x;
         this.initialY = y;

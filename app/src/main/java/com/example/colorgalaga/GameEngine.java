@@ -1,4 +1,5 @@
 package com.example.colorgalaga;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -10,19 +11,11 @@ import android.graphics.Rect;
 import android.media.SoundPool;
 import android.media.AudioManager;
 import android.util.Log;
-import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-
 import java.util.ArrayList;
-import java.util.Random;
 import static java.lang.Thread.sleep;
-
-
-
-
-
 
 
 
@@ -49,12 +42,11 @@ public class GameEngine extends SurfaceView implements Runnable {
     private Paint paintbrush;
     private SurfaceHolder holder;
 
-    //bullet width
-    int SQUARE_WIDTH = 50;
 
-    // touch variables
+    // updated touch positions
     int updatedY;
     int updatedX;
+
 
     // VISIBLE GAME PLAY AREA
     // These variables are set in the constructor
@@ -80,6 +72,7 @@ public class GameEngine extends SurfaceView implements Runnable {
     int MAX_SWIPE_DISTANCE_X = 1000;
     int MAX_SWIPE_DISTANCE_Y = 1000;
 
+    //Touch variables
     int touchUpx;
     int touchUpy;
 
@@ -88,28 +81,29 @@ public class GameEngine extends SurfaceView implements Runnable {
     // ## SPRITES
     // ----------------------------
 
-    // Characters
+    // single Characters
     Sprite player;
-    //Sprite enemy1;
     Sprite bg;
     Sprite blast;
     Sprite theEnd;
     Sprite bomb;
     Sprite shield;
 
-
     Enemy enemy;
+
     Square bullet;
+
+    // multiple characters
 
     ArrayList <Enemy> enemy2 = new ArrayList<Enemy>();
     ArrayList <Enemy> enemyRed = new ArrayList<Enemy>();
     ArrayList <Enemy> enemyBlue = new ArrayList<Enemy>();
 
-    ArrayList <Square> bullets = new ArrayList<Square>();
+    ArrayList <Square> bullets = new ArrayList<>();
 
 
 
-    //Sound
+    //Sound variables
     SoundPool sounds;
     int bulletsound;
 
@@ -120,6 +114,7 @@ public class GameEngine extends SurfaceView implements Runnable {
     int score = 0;
     int lives = 3;
     int count = 0;
+
 
     //flags
     boolean gameOver = false;
@@ -157,22 +152,20 @@ public class GameEngine extends SurfaceView implements Runnable {
 
         // @TODO: Add your sprites
 
-        // initalize sprites
+        // initalize single sprites
         this.bg = new Sprite(this.getContext(), 0, -4000, R.drawable.background3);
         this.player = new Sprite(this.getContext(), 400, 1300, R.drawable.player_ship);
-       // this.enemy1 = new Sprite(this.getContext(), 100, 200, R.drawable.alien_ship1);
-
         this.blast = new Sprite(this.getContext(), 400, 1450, R.drawable.boom);
         this.theEnd = new Sprite(this.getContext(), 400, 1450, R.drawable.gameover);
         this.bomb = new Sprite(this.getContext(), 700, 100, R.drawable.explosive);
         this.shield = new Sprite(this.getContext(), 700, 100, R.drawable.shield);
 
-
+        // initalize multiple sprites added in seperate spawn functions
         this.spawnEnemy();
         this.spawnbullets();
 
 
-        //Sound
+        //initalize Sound
         this.sounds = new SoundPool(10,AudioManager.STREAM_MUSIC,0);
         this.bulletsound = sounds.load(context,R.raw.bulletsound,1);
     }
@@ -188,32 +181,30 @@ public class GameEngine extends SurfaceView implements Runnable {
     int enemyBlueinitialY  = 600;
 
     private void spawnEnemy() {
-        // put player in middle of screen --> you may have to adjust the Y position
-        // depending on your device / emulator
-
 
         // Adding multiple enemies to arraylist
-        //Random rand = new Random();
 
         for (i = 0; i<5; i++) {
 
+            // Enemy line 1
             enemy2initialX = enemy2initialX + 130;
 
             enemy = new Enemy(this.getContext(), enemy2initialX, enemy2initialY);
             enemy2.add(enemy);
-            // Log.d("enemy","added");
 
+            // Enemy line 2
             enemyRedinitialX = enemyRedinitialX + 130;
 
             enemy = new Enemy(this.getContext(), enemyRedinitialX, enemyRedinitialY);
             enemyRed.add(enemy);
-            // Log.d("enemy","added");
 
+
+            //Enemy line 3
             enemyBlueinitialX = enemyBlueinitialX + 130;
 
             enemy = new Enemy(this.getContext(), enemyBlueinitialX, enemyBlueinitialY);
             enemyBlue.add(enemy);
-            //Log.d("enemy","added");
+
         }
 
 
@@ -222,20 +213,9 @@ public class GameEngine extends SurfaceView implements Runnable {
 
 
     private void spawnbullets() {
-        // put player in middle of screen --> you may have to adjust the Y position
-        // depending on your device / emulator
 
-
-        // Adding multiple enemies to arraylist
-        //Random rand = new Random();
-
-        for (i = 0; i<3; i++) {
-
-            this.bullet = new Square(this.getContext(), this.player.getxPosition(), this.player.getyPosition());
-            bullets.add(bullet);
-
-        }
-
+        // @TODO: make multiple bullets
+        
 
 
     }
@@ -279,10 +259,12 @@ public class GameEngine extends SurfaceView implements Runnable {
     // - update, draw, setFPS
     // ------------------------------
 
-    boolean balls = true;
-    final int BALL_SPEED = 5;
+    boolean wall = true;
+    final int ENEMY_SPEED = 5;
 
     public void updatePositions() {
+
+
         // @TODO: Update position of Background to make it loop
 
         this.bg.setyPosition(this.bg.getyPosition() + 25);
@@ -295,34 +277,34 @@ public class GameEngine extends SurfaceView implements Runnable {
 
 
 
-       // @TODO: Update position of enemy ships right to left
+       // @TODO: Update position of enemy ships to move right to left
 
             // move all ememies right to left
 
-            if (balls == true) {
+            if (wall == true) {
                 for (Enemy temp : enemy2) {
-                    temp.setXPosition(temp.xPosition + BALL_SPEED);
+                    temp.setXPosition(temp.xPosition + ENEMY_SPEED);
                 }
 
                 for (Enemy temp : enemyRed) {
-                    temp.setXPosition(temp.xPosition + BALL_SPEED);
+                    temp.setXPosition(temp.xPosition + ENEMY_SPEED);
                 }
 
                 for (Enemy temp : enemyBlue) {
-                    temp.setXPosition(temp.xPosition + BALL_SPEED);
+                    temp.setXPosition(temp.xPosition + ENEMY_SPEED);
                 }
             }
             else {
                 for (Enemy temp : enemy2) {
-                    temp.setXPosition(temp.xPosition - BALL_SPEED);
+                    temp.setXPosition(temp.xPosition - ENEMY_SPEED);
                 }
 
                 for (Enemy temp : enemyRed) {
-                    temp.setXPosition(temp.xPosition - BALL_SPEED);
+                    temp.setXPosition(temp.xPosition - ENEMY_SPEED);
                 }
 
                 for (Enemy temp : enemyBlue) {
-                    temp.setXPosition(temp.xPosition - BALL_SPEED);
+                    temp.setXPosition(temp.xPosition - ENEMY_SPEED);
                 }
             }
 
@@ -330,14 +312,14 @@ public class GameEngine extends SurfaceView implements Runnable {
 
             if (temp.xPosition > screenWidth - 200) {
                // Log.d(TAG, "Ball reached RIGHT of screen. Changing direction!");
-                balls = false;
+                wall = false;
                 // update score
 
             }
 
             if (temp.xPosition < 100) {
                // Log.d(TAG, "Ball reached LEFT of screen. Changing direction!");
-                balls = true;
+                wall = true;
 
             }
 
@@ -346,14 +328,14 @@ public class GameEngine extends SurfaceView implements Runnable {
 
                 if (temp1.xPosition > screenWidth - 200) {
                    // Log.d(TAG, "Ball reached RIGHT of screen. Changing direction!");
-                    balls = false;
+                    wall = false;
                     // update score
 
                 }
 
                 if (temp1.xPosition < 100) {
                    // Log.d(TAG, "Ball reached LEFT of screen. Changing direction!");
-                    balls = true;
+                    wall = true;
 
                 }
             }
@@ -362,14 +344,14 @@ public class GameEngine extends SurfaceView implements Runnable {
 
                     if (temp2.xPosition > screenWidth - 200) {
                        // Log.d(TAG, "Ball reached RIGHT of screen. Changing direction!");
-                        balls = false;
+                        wall = false;
                         // update score
 
                     }
 
                     if (temp2.xPosition < 100) {
                    //     Log.d(TAG, "Ball reached LEFT of screen. Changing direction!");
-                        balls = true;
+                        wall = true;
 
                     }
                 }
@@ -538,7 +520,7 @@ public class GameEngine extends SurfaceView implements Runnable {
 
 
 
-//        // @TODO: Collision detection between player and enemy
+      // @TODO: Collision detection between player and enemy
 //
 //        // Colision of player and enemy
 //         if (player.getHitbox().intersect(enemy1.getHitbox())) {
@@ -569,25 +551,6 @@ public class GameEngine extends SurfaceView implements Runnable {
 
 
         // @TODO: Chasing code form bullet to enemy
-//
-        for (int i = 0; i < this.bullets.size(); i++) {
-            Square firstbullet = this.bullets.get(0);
-
-            firstbullet.setyPosition(firstbullet.getyPosition() - 20);
-
-            if (firstbullet.getyPosition() < this.VISIBLE_TOP) {
-
-                bullets.remove(firstbullet);
-
-                //Upate enemy hitbox
-                firstbullet.updateHitbox();
-
-                this.newbullet = false;
-
-            }
-
-        }
-
 
 
 
@@ -602,7 +565,7 @@ public class GameEngine extends SurfaceView implements Runnable {
            //this.rewardbomb = false;
         }
 
-        // @TODO: Collision detection between enemy and bomb
+        // @TODO: Collision detection between bomb and enemy
 
 //
 //        // @TODO: Update position of shield ships
@@ -651,7 +614,7 @@ public class GameEngine extends SurfaceView implements Runnable {
             //----------------
 
             // set the game's background color
-            canvas.drawColor(Color.argb(255,0,0,0));
+            canvas.drawColor(Color.argb(255, 0, 0, 0));
 
             // setup stroke style and width
             paintbrush.setStyle(Paint.Style.FILL);
@@ -662,7 +625,6 @@ public class GameEngine extends SurfaceView implements Runnable {
             canvas.drawBitmap(this.bg.getImage(), this.bg.getxPosition(), this.bg.getyPosition(), paintbrush);
 
 
-
             // --------------------------------------------------------
             // draw player, enemy and bullet
             // --------------------------------------------------------
@@ -670,15 +632,20 @@ public class GameEngine extends SurfaceView implements Runnable {
             // 1. Player
             canvas.drawBitmap(this.player.getImage(), this.player.getxPosition(), this.player.getyPosition(), paintbrush);
 
+            // player's hitbox
+            Rect r = player.getHitbox();
+            paintbrush.setColor(Color.BLACK);
+            paintbrush.setStyle(Paint.Style.STROKE);
+            canvas.drawRect(r, paintbrush);
 
-            // 2. Enemy
-           // canvas.drawBitmap(this.enemy1.getImage(), this.enemy1.getxPosition(), this.enemy1.getyPosition(), paintbrush);
+
+            // 2. Multiple Enemies with hitboxs
 
             for (Enemy temp : enemy2) {
                 canvas.drawBitmap(temp.getBitmap(), temp.getXPosition(), temp.getYPosition(), paintbrush);
 
                 // 3. draw the enemies's hitbox
-               paintbrush.setColor(Color.GREEN);
+                paintbrush.setColor(Color.GREEN);
                 paintbrush.setStyle(Paint.Style.STROKE);
                 canvas.drawRect(
                         temp.getHitbox(),
@@ -713,24 +680,9 @@ public class GameEngine extends SurfaceView implements Runnable {
 
             }
 
-
-
-
-
-
-
-
-
-            // --------------------------------------------------------
-            // draw hitbox on player
-            // --------------------------------------------------------
-            Rect r = player.getHitbox();
-            paintbrush.setColor(Color.BLACK);
-            paintbrush.setStyle(Paint.Style.STROKE);
-            canvas.drawRect(r, paintbrush);
-
-
+            //--------------------------------
             // DRAW GAME STATS / HUDs
+            //--------------------------------
 
             paintbrush.setTextSize(60);     // set font size
             paintbrush.setColor(Color.RED);
@@ -744,34 +696,21 @@ public class GameEngine extends SurfaceView implements Runnable {
             canvas.drawText("Lives: " + this.lives, 830, 100, paintbrush);
 
 
-
             //-------------------------------------
-            // Colision Updates
+            // Conditional Updates
             //--------------------------------------
 
             if (this.newbullet) {
 
-                for (Square temp : bullets) {
-                    canvas.drawBitmap(temp.getImage1(), temp.getxPosition(), temp.getyPosition(), paintbrush);
-
-                    // 3. draw the bullet's hitbox
-                    paintbrush.setColor(Color.RED);
-                    paintbrush.setStyle(Paint.Style.STROKE);
-                    canvas.drawRect(
-                            temp.getHitbox(),
-                            paintbrush
-                    );
-
-                }
 
             }
 
             if (this.enemyHit) {
-                canvas.drawBitmap(this.blast.getImage(), this.player.getxPosition()- 50, this.player.getyPosition()- 50 , paintbrush);
+                canvas.drawBitmap(this.blast.getImage(), this.player.getxPosition() - 50, this.player.getyPosition() - 50, paintbrush);
             }
 
             if (this.gameOver) {
-                canvas.drawBitmap(this.theEnd.getImage(), this.screenWidth/2 - 300, this.screenHeight/2 - 400 , paintbrush);
+                canvas.drawBitmap(this.theEnd.getImage(), this.screenWidth / 2 - 300, this.screenHeight / 2 - 400, paintbrush);
                 try {
                     gameThread.sleep(2000);
                 } catch (InterruptedException e) {
@@ -784,9 +723,9 @@ public class GameEngine extends SurfaceView implements Runnable {
 
             }
 
-            if(this.rewardbomb){
+            if (this.rewardbomb) {
                 // 2. Reward
-                canvas.drawBitmap(this.bomb.getImage(),this.bomb.getxPosition(), this.bomb.getyPosition() , paintbrush);
+                canvas.drawBitmap(this.bomb.getImage(), this.bomb.getxPosition(), this.bomb.getyPosition(), paintbrush);
 
                 //hit box on bomb
                 Rect bl = bomb.getHitbox();
@@ -819,9 +758,14 @@ public class GameEngine extends SurfaceView implements Runnable {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         int userAction = event.getActionMasked();
+
         //@TODO: What should happen when person touches the screen?
+
+        //------------------------
+        //Touch down
+        //-------------------------
+
         if (userAction == MotionEvent.ACTION_DOWN) {
-          //  Log.d(TAG, "Person tapped the screen");
 
             //---------------------
             // Swipe Effect
@@ -832,24 +776,20 @@ public class GameEngine extends SurfaceView implements Runnable {
             int deltaY = (int)event.getY() - this.touchUpy;
 
 
-            if((deltaY>= MIN_SWIPE_DISTANCE_Y) && (deltaY <= MAX_SWIPE_DISTANCE_Y))
+            //check if the drag is between min and max position
+            if((deltaY >= MIN_SWIPE_DISTANCE_Y) && (deltaY <= MAX_SWIPE_DISTANCE_Y))
             {
                 if(deltaY > 0)
                 {
-                    //this.activity.displayMessage("Swipe to up");
-                    Log.d(TAG, "Swipe to up");
+                    // Swipe up
+                    // Log.d(TAG, "Swipe to up");
 
                     this.bomb.setxPosition(this.player.getxPosition());
                     this.bomb.setyPosition(this.player.getyPosition());
 
+                    //draw the bomb
                     rewardbomb = true;
 
-                }else
-                {
-                    //this.activity.displayMessage("Swipe to down");
-                    Log.d(TAG, "Swipe to down");
-
-                    rewardbomb = true;
                 }
             }
 
@@ -861,98 +801,74 @@ public class GameEngine extends SurfaceView implements Runnable {
             int Jump = 160;
             this.enemyHit = false;
 
+
+            //----------------------------
+            // player touches left side
+            //-----------------------------
+
             if (event.getX() < this.screenWidth / 2 && this.player.getxPosition() > this.VISIBLE_LEFT + this.player.image.getWidth() ) {
                // Log.d(TAG, "Person clicked LEFT side");
 
-
-
-
+                    //Store the touch postion
                     this.updatedX = (int) event.getX();
                     this.updatedY = (int) event.getY();
+
+                    // Draw bullet
+                    this.newbullet = true;
 
                     // update player position
                     this.player.setxPosition(this.player.getxPosition() - Jump);
 
-                    this.newbullet = true;
-
-                // reset bullet position
-//
-//                for (int i = 0; i < this.bullets.size(); i++) {
-//                    Square firstbullet = this.bullets.get(0);
-//
-//                    firstbullet.setxPosition(this.player.getxPosition());
-//                    firstbullet.setyPosition(this.player.getyPosition());
-//
-//
-//                }
-
-//                    this.bullet.setxPosition(this.player.getxPosition());
-//                    this.bullet.setyPosition(this.player.getyPosition());
-
-
-                    //Upate both player and bullet hitbox
+                    //Upate both player's hitbox
                     this.player.updateHitbox();
 
-                    //this.bullet.updateHitbox();
+                    // play bullet sound
+                    //sounds.play(bulletsound,1.0f,1.0f,0,0,1.5f);
 
-                //sounds.play(bulletsound,1.0f,1.0f,0,0,1.5f);
-
-
-
-
+                    // if player hits left wall stop
                     moving = false;
 
             }
             else if (event.getX() > this.screenWidth / 2 && this.player.getxPosition() < this.VISIBLE_RIGHT - this.player.image.getWidth()   ) {
                // Log.d(TAG, "Person clicked RIGHT side");
 
+
+                //---------------------------------
+                //player touches Right side
+                //----------------------------------
+
+
                 // player moves to right
                 this.player.setxPosition(this.player.getxPosition() + Jump);
 
+                //Store the updated position
                 this.updatedX = (int)event.getX();
                 this.updatedY = (int)event.getY();
 
 
-                //Upate both player and bullet hitbox
-                this.player.updateHitbox();
-
+                //Draw bullet
                 this.newbullet = true;
 
+                //Upate both player's hitbox
+                this.player.updateHitbox();
 
-
-                //sounds.play(bulletsound,1.0f,1.0f,0,0,1.5f);
+                // Play Bullet Sound
+               // sounds.play(bulletsound,1.0f,1.0f,0,0,1.5f);
 
             }
 
-             }
+        }
+
+        //-------------------------
+        // Touch up
+        //----------------------------
+
         else if (userAction == MotionEvent.ACTION_UP) {
            // Log.d(TAG, "Person lifted finger");
 
+            // Store last touch position
             this.touchUpx = (int) event.getX();
             this.touchUpx = (int) event.getY();
-
-
-
-//            for (int i = 0; i < this.bullets.size(); i++) {
-//                Square firstbullet = this.bullets.get(0);
-//
-//                firstbullet.setxPosition(this.player.getxPosition());
-//                firstbullet.setyPosition(this.player.getyPosition());
-//
-//
-//            }
-
-
-//               this.bullet.setxPosition(this.player.getxPosition());
-//               this.bullet.setyPosition(this.player.getyPosition());
-
-
-            //Upate both player and bullet hitbox
-           // this.bullet.updateHitbox();
-
-            //sounds.play(bulletsound,1.0f,1.0f,0,0,1.5f);
-
-
         }
 
         return true;

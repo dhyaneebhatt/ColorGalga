@@ -13,6 +13,7 @@ public class Enemy {
     Bitmap image1;
     Bitmap image2;
     Bitmap image3;
+    Bitmap image4;
 
     private Rect hitBox;
 
@@ -21,6 +22,8 @@ public class Enemy {
         this.image1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.alien_ship1);
         this.image2 = BitmapFactory.decodeResource(context.getResources(), R.drawable.alien_ship2);
         this.image3 = BitmapFactory.decodeResource(context.getResources(), R.drawable.alien_ship3);
+        this.image4 = BitmapFactory.decodeResource(context.getResources(), R.drawable.shield);
+
         this.xPosition = x;
         this.yPosition = y;
 
@@ -89,6 +92,14 @@ public class Enemy {
     }
 
     public void setImage3(Bitmap image3) {
+        this.image3 = image3;
+    }
+
+    public Bitmap getImage4() {
+        return image3;
+    }
+
+    public void setImage4(Bitmap image3) {
         this.image3 = image3;
     }
 }
