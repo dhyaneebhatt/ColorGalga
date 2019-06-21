@@ -29,7 +29,7 @@ public class Square {
         this.xPosition = x;
         this.yPosition = y;
         this.width = width;
-        this.image1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.shield);
+        this.image1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.lazer);
 
         this.initialX = x;
         this.initialY = y;
@@ -106,14 +106,9 @@ public class Square {
         return yPosition;
     }
 
+    public int getWidth() { return width; }
 
-    public int getWidth() {
-        return width;
-    }
-
-    public void setWidth(int width) {
-        this.width = width;
-    }
+    public void setWidth(int width) { this.width = width; }
 
     public void setHitbox(Rect hitbox) {
         this.hitbox = hitbox;

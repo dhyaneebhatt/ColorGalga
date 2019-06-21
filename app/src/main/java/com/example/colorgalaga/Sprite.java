@@ -8,6 +8,7 @@ import android.graphics.Rect;
 public class Sprite {
     private int xPosition;
     private int yPosition;
+    private int width;
 
 
     // image
@@ -24,9 +25,10 @@ public class Sprite {
 
 
 
-    public Sprite(Context context, int x, int y, int imageName) {
+    public Sprite(Context context, int x, int y,int width, int imageName) {
         this.xPosition = x;
         this.yPosition = y;
+        this.width = width;
 
         this.image = BitmapFactory.decodeResource(context.getResources(), imageName);
 
