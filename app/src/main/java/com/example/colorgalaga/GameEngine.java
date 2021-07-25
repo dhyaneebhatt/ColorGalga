@@ -17,6 +17,8 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import java.util.ArrayList;
+import java.util.Random;
+
 import static java.lang.Thread.sleep;
 
 
@@ -69,6 +71,7 @@ public class GameEngine extends SurfaceView implements Runnable {
 
     //variables
     int i;
+    int bombcount = 0;
 
 
     //timer
@@ -112,11 +115,11 @@ public class GameEngine extends SurfaceView implements Runnable {
     //Sound variables
     SoundPool sounds;
     int bulletsound;
+    int blastsound;
 
     // GAME STATS
     int score = 0;
     int lives = 3;
-    int count = 0;
 
 
     //flags
@@ -130,6 +133,8 @@ public class GameEngine extends SurfaceView implements Runnable {
     boolean onstart = false;
     boolean newgroup = false;
 
+
+    //Enemy initial position
 
     int enemy2initialX = 100;
     int enemy2initialY  = 200;
@@ -180,14 +185,17 @@ public class GameEngine extends SurfaceView implements Runnable {
 
         //initalize Sound
         this.sounds = new SoundPool(10,AudioManager.STREAM_MUSIC,0);
-        this.bulletsound = sounds.load(context,R.raw.bulletsound,1);
+        this.bulletsound = sounds.load(context, R.raw.bulletsound,1);
+
+//        this.sounds = new SoundPool(10,AudioManager.STREAM_MUSIC,0);
+//        this.blastsound = sounds.load(context, R.raw.blastsound,1);
+
     }
 
 
 
 
     private void spawnEnemy() {
-
 
 
         // Adding multiple enemies to arraylist
@@ -448,6 +456,23 @@ public class GameEngine extends SurfaceView implements Runnable {
 
                     }
 
+//
+                    // colision between enemy and bomb
+                    if (targetE2.getHitbox().intersect(this.bomb.getHitbox())) {
+
+                        enemy2.clear();
+
+                        this.drawplayer = false;
+                        this.enemyHit = true;
+
+                        this.score = this.score + 10;
+
+
+                    }
+
+
+
+
                     // @TODO: Collision detection between enemy2 and bullet
 
                     // Colision of player and enemy2
@@ -467,6 +492,7 @@ public class GameEngine extends SurfaceView implements Runnable {
                             if (this.score % 20 == 0) {
                                 this.shieldpop = true;
                                 this.bombhud = true;
+                                this.bombcount = this.bombcount + 1;
                             }
 
                         }
@@ -574,6 +600,19 @@ public class GameEngine extends SurfaceView implements Runnable {
                             }
                         }
 
+                        // colision between enemy and bomb
+                        if (targetERed.getHitbox().intersect(this.bomb.getHitbox())) {
+
+                            enemyRed.clear();
+
+                            this.drawplayer = false;
+                            this.enemyHit = true;
+
+                            this.score = this.score + 10;
+
+
+                        }
+
 
                         if (last1.yPosition > this.VISIBLE_BOTTOM) {
 
@@ -679,6 +718,19 @@ public class GameEngine extends SurfaceView implements Runnable {
                             }
                         }
 
+                        // colision between enemy and bomb
+                        if (targetEBlue.getHitbox().intersect(this.bomb.getHitbox())) {
+
+                            enemyBlue.clear();
+
+                            this.drawplayer = false;
+                            this.enemyHit = true;
+
+                            this.score = this.score + 10;
+
+
+                        }
+
 
                         if (last2.yPosition > this.VISIBLE_BOTTOM) {
 
@@ -730,6 +782,8 @@ public class GameEngine extends SurfaceView implements Runnable {
 
             this.bomb.setyPosition(this.bomb.getyPosition() - 20);
 
+        this.bomb.updateHitbox();
+
 
         if (this.bomb.getyPosition() > this.VISIBLE_TOP ){
            //this.rewardbomb = false;
@@ -739,51 +793,42 @@ public class GameEngine extends SurfaceView implements Runnable {
 
 
 
-//
-//        // @TODO: Update position of shield ships
-//
-//        this.shield.setyPosition(this.shield.getyPosition() + 20);
-//
-//
-//        if (this.shield.getyPosition() > this.VISIBLE_BOTTOM ){
-//            this.rewardbomb = false;
-//
-//            //Random bomb position
-//            Random r = new Random();
-//            this.randX = r.nextInt(this.screenWidth) +1 ;
-//            this.randY = r.nextInt(this.screenHeight) + 1;
-//
-//            this.shield.setxPosition(randX);
-//            this.shield.setyPosition(randY);
-//        }
-//
-//        // @TODO: Collision detection between player and shield
-//
-//        // Colision of player and enemy
-//        if (player.getHitbox().intersect(shield.getHitbox())) {
-//
-//            this.shield.setxPosition(this.randX);
-//            this.shield.setyPosition(this.randY);
-//
-//            this.rewardbomb = false;
-//
-//            //Upate sheild hitbox
-//            this.shield.updateHitbox();
-//
-//            //Upate player hitbox
-//            this.player.updateHitbox();
-//        }
+
+        // @TODO: Update position of shield ships
+
+        this.shield.setyPosition(this.shield.getyPosition() + 20);
 
 
+        if (this.shield.getyPosition() > this.VISIBLE_BOTTOM ){
+            this.rewardbomb = false;
 
-        //--------------------------------------------------------------
+            //Random bomb position
+            Random r = new Random();
+            this.randX = r.nextInt(this.screenWidth) +1 ;
+            this.randY = r.nextInt(this.screenHeight) + 1;
 
-        //-------------------------
-        //colision Detection
-        //-------------------------
+            this.shield.setxPosition(randX);
+            this.shield.setyPosition(randY);
+        }
 
+        // @TODO: Collision detection between player and shield
 
+        // Colision of player and enemy
+        if (player.getHitbox().intersect(shield.getHitbox())) {
 
+            this.shield.setxPosition(this.randX);
+            this.shield.setyPosition(this.randY);
+
+            this.rewardbomb = false;
+
+            //Upate sheild hitbox
+            this.shield.updateHitbox();
+
+            //Upate player hitbox
+            this.player.updateHitbox();
+        }
+
+        //------------------------------------------------
 
 
     }// end of Update position()
@@ -818,9 +863,9 @@ public class GameEngine extends SurfaceView implements Runnable {
 
                 // player's hitbox
                 Rect r = player.getHitbox();
-                paintbrush.setColor(Color.BLACK);
-                paintbrush.setStyle(Paint.Style.STROKE);
-                canvas.drawRect(r, paintbrush);
+//                paintbrush.setColor(Color.BLACK);
+//                paintbrush.setStyle(Paint.Style.STROKE);
+                //canvas.drawRect(r, paintbrush);
 
             }
 
@@ -833,10 +878,10 @@ public class GameEngine extends SurfaceView implements Runnable {
                 // 3. draw the enemies's hitbox
                 paintbrush.setColor(Color.GREEN);
                 paintbrush.setStyle(Paint.Style.STROKE);
-                canvas.drawRect(
-                        temp.getHitbox(),
-                        paintbrush
-                );
+//                canvas.drawRect(
+//                        temp.getHitbox(),
+//                        paintbrush
+//                );
 
             }
 
@@ -846,10 +891,10 @@ public class GameEngine extends SurfaceView implements Runnable {
                 // 3. draw the enemies's hitbox
                 paintbrush.setColor(Color.GREEN);
                 paintbrush.setStyle(Paint.Style.STROKE);
-                canvas.drawRect(
-                        temp.getHitbox(),
-                        paintbrush
-                );
+//               // canvas.drawRect(
+//                        temp.getHitbox(),
+//                        paintbrush
+//                );
 
             }
 
@@ -859,10 +904,10 @@ public class GameEngine extends SurfaceView implements Runnable {
                 // 3. draw the enemies's hitbox
                 paintbrush.setColor(Color.GREEN);
                 paintbrush.setStyle(Paint.Style.STROKE);
-                canvas.drawRect(
-                        temp.getHitbox(),
-                        paintbrush
-                );
+//               // canvas.drawRect(
+//                        temp.getHitbox(),
+//                        paintbrush
+//                );
 
             } // Draw enemy ends
 
@@ -881,10 +926,10 @@ public class GameEngine extends SurfaceView implements Runnable {
                 // 3. draw the enemies's hitbox
                 paintbrush.setColor(Color.RED);
                 paintbrush.setStyle(Paint.Style.STROKE);
-                canvas.drawRect(
-                        temp.getHitbox(),
-                        paintbrush
-                );
+//                canvas.drawRect(
+//                        temp.getHitbox(),
+//                        paintbrush
+//                );
             }
 
 
@@ -892,63 +937,58 @@ public class GameEngine extends SurfaceView implements Runnable {
             // draw blast when enemy hits the player if true
             if (this.enemyHit) {
                 canvas.drawBitmap(this.blast.getImage(), this.player.getxPosition(), this.player.getyPosition(), paintbrush);
-            }
+                // play bullet sound
+               // sounds.play(blastsound,1.0f,1.0f,1,0,1.5f);
 
+            }
 
 
             // draw game over if true
             if (this.gameOver) {
-//                canvas.drawBitmap(this.theEnd.getImage(), this.screenWidth / 2 - 300, this.screenHeight / 2 - 400, paintbrush);
-//                try {
-//                    gameThread.sleep(2000);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
+                canvas.drawBitmap(this.theEnd.getImage(), this.screenWidth / 2 - 300, this.screenHeight / 2 - 400, paintbrush);
+                try {
+                    gameThread.sleep(2000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
-
 
 
             // draw Weapon of Mass Distruction if true
             if (this.rewardbomb) {
+
                 // 2. Reward
                 canvas.drawBitmap(this.bomb.getImage(), this.bomb.getxPosition(), this.bomb.getyPosition(), paintbrush);
-
-                //Show bomb count on HUD
-
-                // 2. Reward HUD
-                canvas.drawBitmap(this.bomb.getImage(), 440, 100, paintbrush);
-
             }
-
 
             //--------------------------------
             // DRAW GAME STATS / HUDs
             //--------------------------------
 
+            // 1. Score HUD
             paintbrush.setTextSize(60);     // set font size
             paintbrush.setColor(Color.RED);
             paintbrush.setStrokeWidth(5);  // make text narrow
             canvas.drawText("Score: " + this.score, 50, 100, paintbrush);
 
-            if(bombhud){
 
-                // 2. Reward HUD
-                canvas.drawBitmap(this.bomb.getImage(), 440, 100, paintbrush);
+            // 2. Reward HUD
+            paintbrush.setTextSize(60);     // set font size
+            paintbrush.setColor(Color.RED);
+            paintbrush.setStrokeWidth(5);  // make text narrow
+            canvas.drawText("Bomb: " + this.bombcount, 450, 100, paintbrush);
 
-            }
-
-
+            //3. Lives HUD
             paintbrush.setTextSize(60);// set font size
             paintbrush.setColor(Color.RED);
             paintbrush.setStrokeWidth(5);  // make text narrow
             canvas.drawText("Lives: " + this.lives, 830, 100, paintbrush);
 
-
             //----------------
             this.holder.unlockCanvasAndPost(canvas);
         }
 
-    } // ReDraw) ends
+    } // ReDraw Ends
 
 
     public void setFPS() {
@@ -990,15 +1030,16 @@ public class GameEngine extends SurfaceView implements Runnable {
             //check if the drag is between min and max position
             if((deltaY >= MIN_SWIPE_DISTANCE_Y) && (deltaY <= MAX_SWIPE_DISTANCE_Y))
             {
-                if(deltaY > 0)
-                {
+                if(deltaY > 0) {
                     // Swipe up
                     // Log.d(TAG, "Swipe to up");
                     this.bomb.setxPosition(this.player.getxPosition());
                     this.bomb.setyPosition(this.player.getyPosition());
 
-                    //draw the bomb
-                    rewardbomb = true;
+                   // if (this.bombcount > 0){
+                        //draw the bomb
+                        rewardbomb = true;
+               // }
 
                 }
             }
@@ -1029,7 +1070,7 @@ public class GameEngine extends SurfaceView implements Runnable {
                     moving = false;
 
             }
-            else if (event.getX() > this.screenWidth / 2 && this.player.getxPosition() < this.VISIBLE_RIGHT - this.player.image.getWidth()   ) {
+            else if (event.getX() > this.screenWidth / 2 && this.player.getxPosition() < this.VISIBLE_RIGHT + this.player.image.getWidth()   ) {
                // Log.d(TAG, "Person clicked RIGHT side");
 
 
@@ -1064,7 +1105,7 @@ public class GameEngine extends SurfaceView implements Runnable {
             this.player.updateHitbox();
 
             // play bullet sound
-            //sounds.play(bulletsound,1.0f,1.0f,0,0,1.5f);
+            sounds.play(bulletsound,1.0f,1.0f,0,0,1.5f);
 
         }
 
